@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expert Suporte — Manutenção de Impressoras HGP</title>
+  <meta name="description" content="Central de chamados e atendimento para manutenção de impressoras no Hospital Geral (HGP).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- TELA DE AUTENTICAÇÃO (LOGIN E ACESSO ADM) -->
+    <section id="auth-screen" class="auth-wrapper">
+      <div class="auth-container">
+        <!-- Logo Header -->
+        <header class="auth-header">
+          <div class="brand-logo" aria-label="Expert Suporte">
+            <svg class="logo-svg" viewBox="0 0 380 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- 'ex' -->
+              <text x="5" y="85" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="82" fill="#FFFFFF" letter-spacing="-3">ex</text>
+              <!-- 'p' ribbon orange icon integrated -->
+              <path d="M125 15 C150 15 178 30 178 58 C178 86 150 102 125 102 L115 102 L115 130 L95 130 L95 28 C95 20 105 15 125 15 Z" fill="url(#orange-grad)" />
+              <path d="M122 36 C138 36 156 44 156 58 C156 72 138 80 122 80 L115 80 L115 36 Z" fill="#000000" />
+              <!-- 'ert' -->
+              <text x="180" y="85" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="82" fill="#FFFFFF" letter-spacing="-2">ert</text>
+              <!-- (R) -->
+              <circle cx="316" cy="38" r="8" stroke="#FFFFFF" stroke-width="1.8" fill="none" />
+              <text x="316" y="42" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="9" fill="#FFFFFF" text-anchor="middle">R</text>
+              <!-- 'suporte' -->
+              <text x="145" y="125" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="34" fill="#FF6600" letter-spacing="11">suporte</text>
+              <defs>
+                <linearGradient id="orange-grad" x1="95" y1="15" x2="178" y2="130" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#FF9900" />
+                  <stop offset="0.6" stop-color="#FF5500" />
+                  <stop offset="1" stop-color="#E63900" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <p class="auth-subtitle">Manutenção de Impressoras — Exclusivo HGP</p>
+        </header>
+
+        <!-- Card de Login -->
+        <div class="auth-card">
+          <!-- Cabeçalho do Card -->
+          <div class="auth-card-header">
+            <h2 id="auth-title">Acesso ao Sistema</h2>
+            <p id="auth-desc">Informe seu CPF e senha para acessar os chamados.</p>
+          </div>
+
+          <!-- Formulário de Login Usuário Comum (Solicitante / Prestador) -->
+          <form id="form-login" onsubmit="handleLoginSubmit(event)" class="auth-form">
+            <div class="form-group">
+              <label for="login-cpf">CPF <span class="req">*</span></label>
+              <input type="text" id="login-cpf" class="form-input" placeholder="000.000.000-00" maxlength="14" required autocomplete="username" oninput="maskCPF(this)">
+            </div>
+
+            <div class="form-group">
+              <label for="login-senha">Senha <span class="req">*</span></label>
+              <div class="password-field-wrap">
+                <input type="password" id="login-senha" class="form-input" placeholder="Digite sua senha" required autocomplete="current-password">
+                <button type="button" class="btn-toggle-pass" onclick="togglePasswordVisibility('login-senha')" aria-label="Ver senha" title="Ver senha">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+              <span>Entrar</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+
+            <!-- Acesso Rápido para Demonstração -->
+            <div class="demo-access-box">
+              <span class="demo-title">⚡ Teste Rápido com 1 Clique:</span>
+              <div class="demo-buttons">
+                <button type="button" class="btn-demo" onclick="fillDemo('solicitante')">
+                  👤 Solicitante
+                </button>
+                <button type="button" class="btn-demo highlight" onclick="fillDemo('prestador')">
+                  🛠️ Prestador
+                </button>
+              </div>
+            </div>
+
+            <!-- Botão de Acesso Exclusivo do Administrador -->
+            <div class="admin-access-link-wrap">
+              <button type="button" class="btn-link-admin" onclick="switchToAdminLogin()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>Acesso do Administrador (ADM)</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Formulário Exclusivo de Login do Administrador -->
+          <form id="form-admin-login" onsubmit="handleAdminLoginSubmit(event)" class="auth-form hidden">
+            <div class="admin-badge-banner">
+              <span class="admin-shield-icon">🛡️</span>
+              <div>
+                <strong>Portal do Administrador</strong>
+                <p>Gestão e cadastro de solicitantes e prestadores</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="admin-cpf">CPF ou Usuário ADM <span class="req">*</span></label>
+              <input type="text" id="admin-cpf" class="form-input" placeholder="000.000.000-00 ou admin" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+              <label for="admin-senha">Senha Master ADM <span class="req">*</span></label>
+              <div class="password-field-wrap">
+                <input type="password" id="admin-senha" class="form-input" placeholder="Senha do Administrador" required autocomplete="current-password">
+                <button type="button" class="btn-toggle-pass" onclick="togglePasswordVisibility('admin-senha')" aria-label="Ver senha" title="Ver senha">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+              <span>Acessar Painel ADM</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+
+            <!-- Acesso Rápido ADM de Teste -->
+            <div class="demo-access-box">
+              <span class="demo-title">⚡ Acesso Rápido ADM:</span>
+              <div class="demo-buttons" style="grid-template-columns: 1fr;">
+                <button type="button" class="btn-demo highlight" onclick="fillAdminDemo()">
+                  🛡️ Preencher Credenciais ADM (admin / admin123)
+                </button>
+              </div>
+            </div>
+
+            <div class="admin-access-link-wrap">
+              <button type="button" class="btn-link-admin" onclick="switchToUserLogin()">
+                ← Voltar para o Login de Usuários
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA PRINCIPAL DO APLICATIVO (CHAMADOS & CHAT ESTILO WHATSAPP) -->
+    <main id="main-app" class="main-layout hidden">
+      <!-- PAINEL LATERAL ESQUERDO (LISTA DE CHAMADOS ESTILO WHATSAPP) -->
+      <aside class="sidebar">
+        <!-- Barra de Cabeçalho do Usuário Logado -->
+        <header class="sidebar-header">
+          <div class="user-profile-badge">
+            <div class="avatar-wrap">
+              <div class="avatar" id="current-user-avatar">US</div>
+              <span class="user-status-dot" title="Online no CPD TI"></span>
+            </div>
+            <div class="user-meta">
+              <div class="user-name-line">
+                <span class="user-name" id="current-user-name">Usuário</span>
+                <span class="role-pill" id="current-user-role-badge">Solicitante</span>
+              </div>
+              <div class="user-subline">
+                <span class="cpf-pill" id="current-user-cpf">CPF: 000.000.000-00</span>
+                <span class="dept-pill" id="current-user-dept">CPD TI</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-actions">
+            <!-- Botão Atualizar Página / Sincronizar Chamados (Ícone compacto) -->
+            <button type="button" class="btn-icon btn-refresh-page" id="btn-refresh-page" onclick="handleRefreshPage()" title="Recarregar página e sincronizar chamados" aria-label="Atualizar Página">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+            </button>
+
+            <!-- Botão de Estatísticas & Gráficos -->
+            <button type="button" class="btn-icon" onclick="openAnalyticsModal()" title="Ver Contagem de Chamados e Gráficos do HGP" aria-label="Gráficos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            </button>
+
+            <!-- Menu Opções / Alternar Perfil Rápido -->
+            <button type="button" class="btn-icon" onclick="toggleQuickSwitchMenu()" title="Opções e perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div class="dropdown-menu hidden" id="quick-options-menu">
+              <button type="button" onclick="quickSwitchRole()">
+                🔄 Alternar para <strong id="lbl-switch-role">Prestador</strong>
+              </button>
+              <button type="button" onclick="handleLogout()">
+                🚪 Sair da Conta
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- Botão Destaque para Solicitante Abrir Chamado -->
+        <div class="solicitante-action-bar hidden" id="solicitante-action-bar">
+          <button type="button" class="btn-open-ticket-hero" id="btn-open-ticket-modal" onclick="openNewTicketModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+            <span>+ Abrir Novo Chamado de Impressora</span>
+          </button>
+        </div>
+
+        <!-- Barra de Busca de Chamados -->
+        <div class="search-container">
+          <div class="search-input-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="search-tickets-input" placeholder="Pesquisar por assunto, local ou código..." oninput="filterTickets()">
+          </div>
+        </div>
+
+        <!-- Abas de Filtros de Chamados -->
+        <nav class="ticket-filter-tabs" id="ticket-filter-bar">
+          <!-- Gerado dinamicamente via JS baseado no perfil (Solicitante x Prestador) -->
+        </nav>
+
+        <!-- Lista de Chamados / Conversas (Estilo WhatsApp) -->
+        <div class="tickets-list" id="tickets-list-container">
+          <!-- Renderizado via JS -->
+        </div>
+
+        <!-- Rodapé do Sidebar com Logo Expert -->
+        <footer class="sidebar-footer">
+          <div class="brand-mini">
+            <span class="txt-exp">expert</span>
+            <span class="txt-sup">suporte</span>
+          </div>
+          <span class="brand-tagline" style="font-size: 0.72rem; color: var(--text-muted);">Manutenção de Impressoras • HGP</span>
+        </footer>
+      </aside>
+
+      <!-- PAINEL CENTRAL / DIREITO (CHAT DO CHAMADO ESTILO WHATSAPP) -->
+      <section class="chat-viewport" id="chat-viewport">
+        <!-- ESTADO VAZIO (Nenhum chamado selecionado) -->
+        <div class="empty-chat-state" id="empty-chat-state">
+          <div class="empty-graphic">
+            <!-- Ícone de Impressora SVG -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="#FF6600" stroke-width="1.8">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+          </div>
+          <h2>Expert Suporte — Manutenção de Impressoras HGP</h2>
+        </div>
+
+        <!-- CHAT ATIVO -->
+        <div class="active-chat-content hidden" id="active-chat-content">
+          <!-- CABEÇALHO DO CHAT -->
+          <header class="chat-header">
+            <div class="ticket-header-info">
+              <button type="button" class="btn-back-mobile" onclick="closeChatOnMobile()" title="Voltar para a lista">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <div class="ticket-avatar" id="chat-header-avatar">EX</div>
+              <div class="ticket-header-meta">
+                <div class="ticket-header-title-row">
+                  <h3 id="chat-header-title">Título do Chamado</h3>
+                  <span class="badge-status" id="chat-header-status-badge">Aberto</span>
+                </div>
+                <div class="ticket-header-sub">
+                  <span class="ticket-code" id="chat-header-code">#EXP-001</span>
+                  <span class="sep">•</span>
+                  <span class="ticket-dest-location" id="chat-header-location">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span id="chat-header-location-text">Local</span>
+                  </span>
+                  <span class="sep">•</span>
+                  <span class="ticket-assigned-user" id="chat-header-assignee">Técnico: Aguardando</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-header-actions" id="chat-header-actions-container">
+              <!-- Botões contextuais: "Aceitar Chamado", "Encerrar Chamado", "Detalhes" -->
+            </div>
+          </header>
+
+          <!-- BANNER DE STATUS DO CHAMADO (Aguardando / Em Atendimento / Encerrado) -->
+          <div class="ticket-status-strip" id="ticket-status-strip">
+            <div class="strip-content" id="ticket-status-strip-text">
+              Chamado em andamento
+            </div>
+          </div>
+
+          <!-- MENSAGENS / CONTEÚDO DO CHAT (ESTILO WHATSAPP) -->
+          <div class="chat-messages-container" id="chat-messages-container">
+            <!-- Mensagens renderizadas via JS -->
+          </div>
+
+          <!-- BARRA DE DIGITAÇÃO E ENVIO DE MENSAGENS -->
+          <footer class="chat-input-bar" id="chat-input-bar">
+            <div class="quick-attachments">
+              <button type="button" class="btn-attach" onclick="toggleAttachmentMenu()" title="Anexar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+              </button>
+
+              <!-- Menu de Anexos Rápidos -->
+              <div class="attach-popup hidden" id="attach-popup">
+                <button type="button" onclick="sendQuickAction('photo')">
+                  📷 Foto / Captura de Tela
+                </button>
+                <button type="button" onclick="sendQuickAction('location')">
+                  📍 Confirmar Localização
+                </button>
+                <button type="button" onclick="sendQuickAction('audio')">
+                  🎤 Áudio de Atualização
+                </button>
+              </div>
+            </div>
+
+            <div class="input-composer">
+              <input type="text" id="message-text-input" placeholder="Digite uma mensagem..." onkeydown="handleMessageKeyDown(event)" autocomplete="off">
+            </div>
+
+            <button type="button" class="btn-send-message" id="btn-send-message" onclick="sendMessage()" title="Enviar mensagem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </footer>
+        </div>
+      </section>
+    </main>
+
+    <!-- PAINEL EXCLUSIVO DO ADMINISTRADOR (CADASTRO E GESTÃO DE USUÁRIOS) -->
+    <section id="admin-panel" class="admin-wrapper hidden">
+      <div class="admin-layout-container">
+        <!-- Cabeçalho do Painel ADM -->
+        <header class="admin-header">
+          <div class="admin-header-brand">
+            <div class="brand-mini">
+              <span class="txt-exp" style="font-size: 1.4rem;">expert</span>
+              <span class="txt-sup" style="font-size: 1.4rem;">suporte</span>
+            </div>
+            <span class="admin-pill-tag">PAINEL ADMINISTRATIVO</span>
+          </div>
+
+          <div class="admin-header-actions">
+            <button type="button" class="btn btn-secondary btn-refresh-page" onclick="handleRefreshPage()" title="Recarregar a página">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width: 15px; height: 15px;"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+              <span>Atualizar</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="enterAppFromAdmin()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span>Ver Central de Chamados</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="handleLogout()" style="color: #f87171;">
+              🚪 Sair do ADM
+            </button>
+          </div>
+        </header>
+
+        <!-- Métricas Rápidas do Sistema -->
+        <div class="admin-metrics-grid">
+          <div class="admin-metric-card" style="border-left: 3px solid #ff6600;">
+            <div class="metric-icon" style="background: rgba(255, 102, 0, 0.12); color: #ff8533;">🔥</div>
+            <div>
+              <span class="metric-label">Total Geral de Chamados</span>
+              <strong class="metric-value" id="metric-total-abertos" style="color: #ff8533;">0</strong>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Histórico Geral</span>
+            </div>
+          </div>
+
+          <div class="admin-metric-card">
+            <div class="metric-icon" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8;">👥</div>
+            <div>
+              <span class="metric-label">Solicitantes Cadastrados</span>
+              <strong class="metric-value" id="metric-solicitantes">0</strong>
+            </div>
+          </div>
+
+          <div class="admin-metric-card">
+            <div class="metric-icon" style="background: rgba(255, 102, 0, 0.1); color: #ff8533;">🛠️</div>
+            <div>
+              <span class="metric-label">Prestadores / Técnicos</span>
+              <strong class="metric-value" id="metric-prestadores">0</strong>
+            </div>
+          </div>
+
+          <div class="admin-metric-card">
+            <div class="metric-icon" style="background: rgba(245, 158, 11, 0.1); color: #fbbf24;">⏳</div>
+            <div>
+              <span class="metric-label">Chamados Pendentes</span>
+              <strong class="metric-value" id="metric-pendentes">0</strong>
+            </div>
+          </div>
+
+          <div class="admin-metric-card">
+            <div class="metric-icon" style="background: rgba(16, 185, 129, 0.1); color: #34d399;">✅</div>
+            <div>
+              <span class="metric-label">Chamados Concluídos</span>
+              <strong class="metric-value" id="metric-concluidos">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Política de Retenção & Firebase Leve -->
+        <div class="retention-box">
+          <div class="retention-info">
+            <span class="retention-icon">🧹</span>
+            <div>
+              <strong>Política de 3 Semanas (Histórico Leve no Firebase)</strong>
+              <p id="retention-status-text">Chamados encerrados há mais de 21 dias são arquivados automaticamente. A contagem vitalícia e os gráficos são preservados.</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary" onclick="triggerManualCleanup()" title="Executar limpeza agora">
+              <span>🧹 Limpar (> 21 dias)</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="openFirebaseConfigModal()" title="Configurações do Firebase">
+              ⚙️ <span id="firebase-status-badge">Banco de Dados</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Seção de Gráficos e Analytics do HGP -->
+        <section class="admin-charts-section">
+          <div class="admin-section-header">
+            <div class="admin-card-title-wrap">
+              <div class="admin-icon-circle" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">📊</div>
+              <div>
+                <h3>Estatísticas & Gráficos do Hospital Geral (HGP)</h3>
+                <p>Métricas visuais de chamados de impressoras, setores e categorias em tempo real.</p>
+              </div>
+            </div>
+            <div class="charts-actions">
+              <span class="badge-retention">✅ Retenção de 21 dias ativa</span>
+            </div>
+          </div>
+
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h4>Chamados por Setor do HGP</h4>
+                <span class="chart-subtitle">Pronto-Socorro, Triagem, Farmácia, Ala Cirúrgica, UTI...</span>
+              </div>
+              <div class="chart-canvas-container">
+                <canvas id="chart-setores"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h4>Defeitos Mecânicos de Impressora</h4>
+                <span class="chart-subtitle">Pulseiras, Atolamento de Papel, Guilhotina/Roletes...</span>
+              </div>
+              <div class="chart-canvas-container">
+                <canvas id="chart-categorias"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <h4>Status dos Chamados</h4>
+                <span class="chart-subtitle">Abertos vs Em Atendimento vs Encerrados</span>
+              </div>
+              <div class="chart-canvas-container">
+                <canvas id="chart-status"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="admin-content-columns">
+          <!-- Coluna 1: Formulário de Cadastro de Novo Usuário -->
+          <div class="admin-card-box">
+            <div class="admin-card-header">
+              <div class="admin-card-title-wrap">
+                <div class="admin-icon-circle">➕</div>
+                <div>
+                  <h3>Cadastrar Novo Usuário</h3>
+                  <p>Adicione solicitantes ou prestadores ao sistema.</p>
+                </div>
+              </div>
+            </div>
+
+            <form id="form-admin-register" onsubmit="handleAdminCreateUser(event)" class="auth-form" style="margin-top: 16px;">
+              <!-- Seletor de Perfil do Novo Usuário -->
+              <div class="form-group">
+                <label>Tipo de Perfil <span class="req">*</span></label>
+                <div class="role-options">
+                  <label class="role-option">
+                    <input type="radio" name="admin-reg-role" value="solicitante" checked>
+                    <div class="role-card-inner">
+                      <div class="role-text">
+                        <strong>Solicitante</strong>
+                        <span>Abre chamados e relata problemas</span>
+                      </div>
+                    </div>
+                  </label>
+
+                  <label class="role-option">
+                    <input type="radio" name="admin-reg-role" value="prestador">
+                    <div class="role-card-inner">
+                      <div class="role-text">
+                        <strong>Prestador</strong>
+                        <span>Técnico que atende e finaliza</span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="adm-reg-nome">Nome Completo <span class="req">*</span></label>
+                <input type="text" id="adm-reg-nome" placeholder="Ex: Lucas Ferreira da Silva" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="adm-reg-cpf">CPF (Identificação Única) <span class="req">*</span></label>
+                  <input type="text" id="adm-reg-cpf" placeholder="000.000.000-00" maxlength="14" required oninput="maskCPF(this)">
+                </div>
+
+                <div class="form-group">
+                  <label for="adm-reg-senha">Senha Inicial de Acesso <span class="req">*</span></label>
+                  <input type="text" id="adm-reg-senha" placeholder="Ex: 123456" required minlength="3">
+                </div>
+              </div>
+
+              <!-- Aviso informativo de setor unificado CPD TI -->
+              <div class="dept-info-callout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <div>
+                  <strong>Setor / Equipe Unificada: CPD TI</strong>
+                  <p>Todos os colaboradores pertencem ao CPD TI do hospital.</p>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 14px;">
+                <span>Salvar e Cadastrar Usuário</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </form>
+          </div>
+
+          <!-- Coluna 2: Tabela de Usuários Cadastrados -->
+          <div class="admin-card-box">
+            <div class="admin-card-header">
+              <div class="admin-card-title-wrap">
+                <div class="admin-icon-circle" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8;">📋</div>
+                <div>
+                  <h3>Usuários Cadastrados no Sistema</h3>
+                  <p>Lista de solicitantes e prestadores com acesso.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Perfil</th>
+                    <th>Departamento</th>
+                    <th style="text-align: right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-users-tbody">
+                  <!-- Gerado dinamicamente via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL: ABRIR NOVO CHAMADO (PARA SOLICITANTES) -->
+    <div class="modal-backdrop hidden" id="modal-new-ticket">
+      <div class="modal-box">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF6600" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div>
+              <h3>Abertura de Chamado — Manutenção HGP</h3>
+              <p>Manutenção técnica exclusiva para impressoras do Hospital Geral (HGP).</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeModal('modal-new-ticket')">&times;</button>
+        </header>
+
+        <form id="form-new-ticket" onsubmit="handleCreateTicketSubmit(event)">
+          <div class="form-group">
+            <label for="ticket-title">Modelo da Impressora / Defeito Apresentado <span class="req">*</span></label>
+            <input type="text" id="ticket-title" placeholder="Ex: Impressora de pulseiras travada ou Laser atolando folha" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="ticket-location">Setor / Ala do HGP onde está a Impressora <span class="req">*</span></label>
+              <input type="text" id="ticket-location" class="form-input" placeholder="Ex: HGP - Pronto-Socorro / Triagem / Bloco B" required>
+            </div>
+
+            <div class="form-group">
+              <label for="ticket-priority">Nível de Prioridade <span class="req">*</span></label>
+              <select id="ticket-priority" required>
+                <option value="baixa">🟢 Baixa (Ajuste mecânico de rotina)</option>
+                <option value="media" selected>🟡 Média (Falha parcial / Barulho)</option>
+                <option value="alta">🟠 Alta (Impressora de setor parada)</option>
+                <option value="urgente">🔴 Urgente (Pronto-Socorro / UTI / Emergência)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ticket-category">Tipo de Defeito Mecânico <span class="req">*</span></label>
+            <select id="ticket-category" required>
+              <option value="Impressora de Pulseiras / Etiquetas" selected>🏷️ Impressora de Pulseiras / Etiquetas (Travada, corte, código ilegível)</option>
+              <option value="Atolamento / Enrosco de Papel">📄 Atolamento de Papel (Folhas presas nos roletes / mecanismo)</option>
+              <option value="Guilhotina / Roletes / Barulho">⚙️ Guilhotina / Roletes Danificados (Barulho estranho, tracionador)</option>
+              <option value="Luz de Erro / Não Inicializa">🔴 Impressora Travada com Luz de Erro / Não Inicializa</option>
+              <option value="Manutenção Preventiva / Limpeza">🛠️ Manutenção Preventiva / Limpeza Mecânica Interna</option>
+              <option value="Outro Defeito Mecânico">📋 Outro Defeito Mecânico na Impressora</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="ticket-description">O que está acontecendo com a impressora? <span class="req">*</span></label>
+            <textarea id="ticket-description" rows="4" placeholder="Descreva o defeito apresentado: se o papel enroscou, luz de erro piscando, barulho ao puxar folhas, guilhotina emperrada..." required></textarea>
+            <div style="font-size: 0.76rem; color: #fbbf24; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); padding: 8px 12px; border-radius: var(--radius-sm); margin-top: 6px;">
+              ⚠️ <strong>Escopo Expert no HGP:</strong> Realizamos exclusivamente manutenção técnica e mecânica de impressoras. Não realizamos troca ou reposição de toner/suprimentos.
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-new-ticket')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              <span>Publicar Chamado</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: ENCERRAR CHAMADO (PARA PRESTADORES) -->
+    <div class="modal-backdrop hidden" id="modal-close-ticket">
+      <div class="modal-box">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon icon-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <div>
+              <h3>Encerrar e Finalizar Serviço</h3>
+              <p>Registre a solução aplicada para concluir o chamado.</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeModal('modal-close-ticket')">&times;</button>
+        </header>
+
+        <form id="form-close-ticket" onsubmit="handleFinishTicketSubmit(event)">
+          <div class="form-group">
+            <label for="finish-solution">Descrição da Solução / Serviço Realizado <span class="req">*</span></label>
+            <textarea id="finish-solution" rows="4" placeholder="Ex: Desobstrução do rolo fusor, troca da guilhotina e limpeza mecânica interna. Testado e validado junto à enfermagem." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="finish-satisfaction">Estado Final do Equipamento / Sistema</label>
+            <select id="finish-satisfaction">
+              <option value="100% Operacional e Testado" selected>✅ 100% Operacional e Testado</option>
+              <option value="Resolvido Provisoriamente (Pendente Peça)">⚠️ Resolvido Provisoriamente</option>
+              <option value="Orientação / Treinamento Prestado">ℹ️ Orientação / Treinamento Concluído</option>
+            </select>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-close-ticket')">Voltar</button>
+            <button type="submit" class="btn btn-success">
+              <span>Confirmar e Encerrar Chamado</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: DETALHES COMPLETOS DO CHAMADO -->
+    <div class="modal-backdrop hidden" id="modal-ticket-details">
+      <div class="modal-box modal-details">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF6600" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            </div>
+            <div>
+              <h3 id="details-modal-title">Ficha Técnica do Chamado</h3>
+              <p id="details-modal-code">#EXP-000</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeModal('modal-ticket-details')">&times;</button>
+        </header>
+
+        <div class="details-body" id="details-modal-body">
+          <!-- Conteúdo gerado via JS -->
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" onclick="closeModal('modal-ticket-details')">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: ESTATÍSTICAS E GRÁFICOS DO HGP -->
+    <div class="modal-backdrop hidden" id="modal-analytics">
+      <div class="modal-box" style="max-width: 960px;">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+              <span style="font-size: 1.4rem;">📊</span>
+            </div>
+            <div>
+              <h3>Contagem de Chamados & Gráficos do HGP</h3>
+              <p>Relatório estatístico em tempo real de manutenção de impressoras no hospital.</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeModal('modal-analytics')">&times;</button>
+        </header>
+
+        <div class="admin-metrics-grid" style="margin-bottom: 20px;">
+          <div class="admin-metric-card" style="border-left: 3px solid #ff6600;">
+            <div class="metric-icon" style="background: rgba(255, 102, 0, 0.12); color: #ff8533;">🔥</div>
+            <div>
+              <span class="metric-label">Total Geral de Chamados</span>
+              <strong class="metric-value" id="modal-metric-total-abertos">0</strong>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Histórico Geral</span>
+            </div>
+          </div>
+
+          <div class="admin-metric-card">
+            <div class="metric-icon" style="background: rgba(245, 158, 11, 0.1); color: #fbbf24;">⏳</div>
+            <div>
+              <span class="metric-label">Aguardando Técnico</span>
+              <strong class="metric-value" id="modal-metric-pendentes">0</strong>
+            </div>
+          </div>
+
+          <div class="admin-metric-card">
+            <div class="metric-icon" style="background: rgba(56, 189, 248, 0.1); color: #38bdf8;">💬</div>
+            <div>
+              <span class="metric-label">Em Atendimento</span>
+              <strong class="metric-value" id="modal-metric-andamento">0</strong>
+            </div>
+          </div>
+
+          <div class="admin-metric-card">
+            <div class="metric-icon" style="background: rgba(16, 185, 129, 0.1); color: #34d399;">✅</div>
+            <div>
+              <span class="metric-label">Encerrados</span>
+              <strong class="metric-value" id="modal-metric-concluidos">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h4>Chamados por Setor do HGP</h4>
+              <span class="chart-subtitle">Pronto-Socorro, Triagem, Farmácia, Ala Cirúrgica, UTI...</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="modal-chart-setores"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <h4>Defeitos Mecânicos de Impressora</h4>
+              <span class="chart-subtitle">Pulseiras, Atolamento de Papel, Guilhotina/Roletes...</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="modal-chart-categorias"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" onclick="closeModal('modal-analytics')">Fechar Relatório</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: CONFIGURAÇÃO DO BANCO FIREBASE -->
+    <div class="modal-backdrop hidden" id="modal-firebase-config">
+      <div class="modal-box" style="max-width: 640px;">
+        <header class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+              <span style="font-size: 1.4rem;">🔥</span>
+            </div>
+            <div>
+              <h3>Conexão com Firebase Firestore</h3>
+              <p>Estrutura de banco em nuvem otimizada e ultra-leve.</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeModal('modal-firebase-config')">&times;</button>
+        </header>
+
+        <form id="form-firebase-config" onsubmit="handleSaveFirebaseConfig(event)">
+          <div style="background: #111114; border: 1px solid #27272a; padding: 14px; border-radius: var(--radius-md); margin-bottom: 16px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+            💡 <strong>Economia de Recursos & Gratuito:</strong> O sistema possui cache persistente offline e limpa automaticamente o histórico com mais de 3 semanas, garantindo que o Firebase opere 100% dentro do plano gratuito sem consumir cota. Se preferir não usar chaves agora, o sistema opera no modo local resiliente.
+          </div>
+
+          <div class="form-group">
+            <label for="fb-api-key">API Key (apiKey)</label>
+            <input type="text" id="fb-api-key" placeholder="AIzaSy...">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fb-project-id">Project ID (projectId)</label>
+              <input type="text" id="fb-project-id" placeholder="expert-suporte-hgp">
+            </div>
+
+            <div class="form-group">
+              <label for="fb-auth-domain">Auth Domain (authDomain)</label>
+              <input type="text" id="fb-auth-domain" placeholder="expert-suporte-hgp.firebaseapp.com">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fb-storage-bucket">Storage Bucket</label>
+              <input type="text" id="fb-storage-bucket" placeholder="expert-suporte-hgp.appspot.com">
+            </div>
+
+            <div class="form-group">
+              <label for="fb-app-id">App ID</label>
+              <input type="text" id="fb-app-id" placeholder="1:1234567890:web:abcdef...">
+            </div>
+          </div>
+
+          <div class="modal-actions" style="justify-content: space-between;">
+            <button type="button" class="btn btn-secondary" onclick="handleClearFirebaseConfig()">Restaurar Modo Local</button>
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn btn-secondary" onclick="closeModal('modal-firebase-config')">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Salvar e Conectar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- SISTEMA DE TOAST NOTIFICATIONS -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
